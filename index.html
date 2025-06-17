@@ -1,78 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Passport to Barcode</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تحويل الجوازات إلى باركود</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
     body {
+      background-color: #ffffff;
+      color: #000000;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #f4f4f4;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
+      padding: 0;
     }
-    h1 {
-      color: #2c3e50;
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
     }
-    input[type="text"] {
-      padding: 0.75rem;
-      font-size: 1.25rem;
-      width: 600px;
-      margin-bottom: 1rem;
-      border-radius: 6px;
+
+    h2 {
+      color: #1a1a1a;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      background-color: #f2f2f2;
+      color: #000000;
+      resize: vertical;
     }
+
     button {
-      padding: 0.75rem 1.5rem;
-      font-size: 1.1rem;
-      background: #2c3e50;
-      color: #fff;
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin-top: 20px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
       border: none;
+      border-radius: 8px;
       cursor: pointer;
-      border-radius: 6px;
-      box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
     }
-    #barcode {
-      margin-top: 2rem;
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .barcode-box {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .barcode-label {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    svg {
+      width: 300px;
+      height: 100px;
     }
   </style>
 </head>
 <body>
-  <h1>Generate Passport Barcode</h1>
-  <input type="text" id="passportInput" placeholder="Enter passport number" />
-  <button onclick="generateBarcode()">Generate Barcode</button>
-  <div id="barcode"></div>
+  <div class="container">
+    <h2>تحويل أرقام الجوازات إلى باركود</h2>
+    <textarea id="passportList" placeholder="اكتب أو الصق أرقام الجوازات هنا، كل جواز في سطر مستقل..."></textarea>
+    <button onclick="generateBarcodes()">توليد الباركودات</button>
+    <div id="barcodeOutput"></div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script>
-    function generateBarcode() {
-      const input = document.getElementById('passportInput').value.trim();
-      const valid = /^(?=.*[A-Z])(?=.*[0-9])[A-Z0-9 ]+$/i.test(input);
-      const barcodeDiv = document.getElementById('barcode');
-      barcodeDiv.innerHTML = "";
-      if (valid) {
-        const parts = input.split(/\s+/);
-        parts.forEach((code) => {
-          if (/^(?=.*[A-Z])(?=.*[0-9])[A-Z0-9]+$/i.test(code)) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            JsBarcode(svg, code.toUpperCase(), {
-              format: "CODE128",
-              lineColor: "#000",
-              width: 2,
-              height: 100,
-              displayValue: true
-            });
-            barcodeDiv.appendChild(svg);
-          }
-        });
-      } else {
-        barcodeDiv.textContent = "Invalid passport number. Only letters and numbers allowed, and must include both.";
-      }
+    function generateBarcodes() {
+      const output = document.getElementById("barcodeOutput");
+      output.innerHTML = ""; // Clear previous results
+      const list = document.getElementById("passportList").value.split("\n");
+
+      list.forEach((line) => {
+        const passport = line.trim();
+        if (/^[A-Z0-9]+$/i.test(passport)) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "barcode-box";
+
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          JsBarcode(svg, passport, {
+            format: "CODE128",
+            lineColor: "#000000",
+            background: "#ffffff",
+            width: 3,
+            height: 100,
+            fontSize: 18,
+            displayValue: true
+          });
+
+          const label = document.createElement("div");
+          label.className = "barcode-label";
+          label.textContent = `رقم الجواز: ${passport}`;
+
+          // ترتيب: باركود يسار - نص يمين
+          wrapper.appendChild(svg);
+          wrapper.appendChild(label);
+          output.appendChild(wrapper);
+        }
+      });
     }
   </script>
 </body>
